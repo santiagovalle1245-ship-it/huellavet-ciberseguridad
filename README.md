@@ -1,6 +1,6 @@
 # HuellaVet - Laboratorio Local de Ciberseguridad
 
-Aplicación web educativa en Python y Flask para prácticas locales autorizadas de ciberseguridad (`127.0.0.1`).
+Aplicación web en Python y Flask para proyecto final (`127.0.0.1`).
 
 ## Requisitos y ejecución
 
