@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Login - HuellaVet{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Iniciar Sesión</h2>
+
+    {% if session.get('username') %}
+        <div class="alert-info">
+            Sesión actual: <strong>{{ session.get('username') }}</strong>. Puedes iniciar sesión con otra cuenta si lo deseas.
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <label for="username">Usuario</label>
+        <input type="text" id="username" name="username" placeholder="Ej. ana" required>
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="Contraseña" required>
+
+        <button type="submit">Entrar</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Expediente Médico - HuellaVet{% endblock %}
+
+{% block content %}
+<div class="card">
+    {% if registro %}
+        <h2>Expediente Médico #{{ registro.id }}</h2>
+        <div class="detail-list">
+            <p><strong>Mascota:</strong> {{ registro.mascota }}</p>
+            <p><strong>Dueño:</strong> {{ registro.dueno_nombre }} (ID: {{ registro.dueno_id }})</p>
+            <p><strong>Diagnóstico:</strong> {{ registro.diagnostico }}</p>
+            <p><strong>Notas:</strong> {{ registro.notas }}</p>
+        </div>
+    {% else %}
+        <h2>Expediente no encontrado</h2>
+        <div class="alert-error">No existe el expediente con ID {{ exp_id }}.</div>
+    {% endif %}
+
+    <p style="margin-top: 20px;">
+        <a href="{{ url_for('index') }}">← Volver al inicio</a>
+    </p>
+</div>
+{% endblock %}

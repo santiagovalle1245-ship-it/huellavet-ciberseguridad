@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - HuellaVet{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Bienvenido a Clínica Veterinaria HuellaVet</h2>
+    <p>Portal local de gestión clínica para laboratorio educativo de ciberseguridad.</p>
+
+    {% if session.get('username') %}
+        <div class="alert-info">
+            Has iniciado sesión como <strong>{{ session.get('username') }}</strong> (ID de usuario: {{ session.get('user_id') }}).
+        </div>
+    {% endif %}
+
+    <div class="menu-grid">
+        <a class="menu-item" href="{{ url_for('login') }}">
+            <h3>Login</h3>
+            <p>Inicia sesión con tu cuenta de cliente.</p>
+        </a>
+        <a class="menu-item" href="{{ url_for('buscar') }}">
+            <h3>Buscar Mascota</h3>
+            <p>Consulta mascotas registradas por nombre o diagnóstico.</p>
+        </a>
+        <a class="menu-item" href="{{ url_for('expediente', exp_id=session.get('user_id', 1)) }}">
+            <h3>Mis Expedientes</h3>
+            <p>Revisa el expediente médico de tu mascota.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

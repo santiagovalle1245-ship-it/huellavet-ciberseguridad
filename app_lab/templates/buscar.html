@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar Mascota - HuellaVet{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Buscar Mascota</h2>
+
+    <form method="GET" action="{{ url_for('buscar') }}">
+        <label for="q">Nombre de mascota o diagnóstico</label>
+        <input type="text" id="q" name="q" value="{{ q }}" placeholder="Ej. Firulais">
+        <button type="submit">Buscar</button>
+    </form>
+
+    {% if q %}
+        <hr style="margin: 24px 0; border: none; border-top: 1px solid #e4ece9;">
+        <p>Resultados para: <strong>{{ q | safe }}</strong></p>
+
+        {% if resultados %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mascota</th>
+                        <th>Dueño</th>
+                        <th>Diagnóstico</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in resultados %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.mascota }}</td>
+                        <td>{{ item.dueno }}</td>
+                        <td>{{ item.diagnostico }}</td>
+                        <td><a href="{{ url_for('expediente', exp_id=item.id) }}">Ver expediente</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No se encontraron mascotas que coincidan con la búsqueda.</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

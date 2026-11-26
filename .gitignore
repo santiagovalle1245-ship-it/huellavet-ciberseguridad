@@ -1,0 +1,6 @@
+app_lab/venv/
+__pycache__/
+*.pyc
+*.db
+*.log
+evidencias/
