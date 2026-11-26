@@ -2,6 +2,7 @@ import logging
 import os
 import sqlite3
 from flask import Flask, g, redirect, render_template, request, session, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "huellavet.db")
@@ -69,8 +70,8 @@ def init_db():
     cursor.executemany(
         "INSERT OR IGNORE INTO usuarios (id, username, password) VALUES (?, ?, ?)",
         [
-            (1, "ana", "1234"),
-            (2, "roberto", "5678"),
+            (1, "ana", generate_password_hash("1234")),
+            (2, "roberto", generate_password_hash("5678")),
         ],
     )
 
@@ -87,8 +88,14 @@ def init_db():
 
 
 @app.after_request
-def log_request(response):
-    """Registra fecha/hora, IP, usuario actual, ruta visitada y resultado de login/acceso."""
+def after_request_security_and_logging(response):
+    """Agrega cabeceras HTTP de seguridad y registra eventos en huellavet.log."""
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    )
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+
     ip = request.remote_addr or "-"
     usuario = session.get("username", "anonimo")
     ruta = request.full_path.rstrip("?")
@@ -117,30 +124,21 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "")
         password = request.form.get("password", "")
+        ip = request.remote_addr or "-"
 
         db = get_db()
-        # Vulnerabilidad SQL Injection por concatenación directa
-        query = (
-            "SELECT id, username FROM usuarios "
-            f"WHERE username = '{username}' AND password = '{password}'"
-        )
+        user = db.execute(
+            "SELECT id, username, password FROM usuarios WHERE username = ?",
+            (username,),
+        ).fetchone()
 
-        try:
-            cursor = db.cursor()
-            cursor.execute(query)
-            user = cursor.fetchone()
-        except sqlite3.Error as exc:
-            g.evento_log = f"LOGIN_ERROR_SQL (intento={username})"
-            error = f"Error en la consulta SQL: {exc}"
-            return render_template("login.html", error=error), 400
-
-        if user:
+        if user and check_password_hash(user["password"], password):
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             g.evento_log = "LOGIN_EXITOSO"
             return redirect(url_for("index"))
 
-        g.evento_log = f"LOGIN_FALLIDO (intento={username})"
+        g.evento_log = f"[ALERTA_SEGURIDAD] LOGIN_FALLIDO (intento={username}, ip={ip})"
         error = "Usuario o contraseña incorrectos."
 
     return render_template("login.html", error=error)
@@ -163,7 +161,6 @@ def buscar():
             (f"%{q}%", f"%{q}%"),
         ).fetchall()
 
-    # Vulnnerabilidad XSS reflejado en buscar.html usando | safe
     return render_template("buscar.html", q=q, resultados=resultados)
 
 
@@ -174,7 +171,6 @@ def expediente(exp_id):
         return redirect(url_for("login"))
 
     db = get_db()
-    # Vulnerabilidad  IDOR/BOLA (no valida que dueno_id == session["user_id"])
     registro = db.execute(
         """
         SELECT e.id, e.mascota, e.dueno_id, e.diagnostico, e.notas, u.username AS dueno_nombre
@@ -187,10 +183,17 @@ def expediente(exp_id):
 
     if registro is None:
         g.evento_log = f"EXPEDIENTE_NO_ENCONTRADO (id={exp_id})"
-        return render_template("expediente.html", registro=None, exp_id=exp_id), 404
+        return render_template("expediente.html", registro=None, exp_id=exp_id, forbidden=False), 404
+
+    if registro["dueno_id"] != session["user_id"]:
+        g.evento_log = (
+            f"[ALERTA_SEGURIDAD] ACCESO_DENEGADO_IDOR "
+            f"(usuario={session.get('username')}, exp_id={exp_id})"
+        )
+        return render_template("expediente.html", registro=None, exp_id=exp_id, forbidden=True), 403
 
     g.evento_log = f"CONSULTA_EXPEDIENTE (id={exp_id})"
-    return render_template("expediente.html", registro=registro, exp_id=exp_id)
+    return render_template("expediente.html", registro=registro, exp_id=exp_id, forbidden=False)
 
 
 init_db()
