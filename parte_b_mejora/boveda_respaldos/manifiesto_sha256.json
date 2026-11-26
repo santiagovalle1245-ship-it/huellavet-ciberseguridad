@@ -1,0 +1,9 @@
+{
+    "fecha_respaldo": "2026-11-26 02:27:26",
+    "archivo_cifrado": "respaldo_huellavet.enc",
+    "hashes_sha256": {
+        "citas.csv": "2723714ba4fede5a1941c8571df1797442e2966aa2ce8565f062690692858a2a",
+        "expedientes.csv": "a2e43fe01f276ac39083050bee850f3085bf1e2aa5bf0fda07bcbcd4ed07b83f",
+        "pagos.csv": "eed94fcb6b1f6910872300fe8d48e59f42a279152dad47aec2aafff01b66f2bb"
+    }
+}

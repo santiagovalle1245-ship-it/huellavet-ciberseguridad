@@ -33,3 +33,10 @@ Aplicación web en Python y Flask para proyecto final (`127.0.0.1`).
    ```
 
 5. Abrir en el navegador: `http://127.0.0.1:5000/`
+
+
+## Mejora Técnica — Parte B (Respaldo Cifrado y Verificación SHA-256)
+Ubicación: `parte_b_mejora/respaldo_seguro.py`
+- Generar respaldo cifrado y hashes: `python parte_b_mejora/respaldo_seguro.py respaldar`
+- Simular ataque de ransomware: `python parte_b_mejora/respaldo_seguro.py simular_ransomware`
+- Restaurar y verificar integridad SHA-256: `python parte_b_mejora/respaldo_seguro.py restaurar`
